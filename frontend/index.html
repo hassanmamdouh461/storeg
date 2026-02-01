@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>نظام إدارة المستودعات (WMS)</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="splash.css">
+    <!-- Appwrite SDK -->
+    <script src="https://cdn.jsdelivr.net/npm/appwrite@14.0.0"></script>
+    <!-- Fonts & Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
+</head>
+<body>
+    <!-- Welcome Splash Screen -->
+    <div id="splashScreen" class="splash-screen">
+        <div class="splash-content">
+            <div class="splash-logo">
+                <i class="ri-archive-fill"></i>
+            </div>
+            <h1>WMS Pro</h1>
+            <p>نظام إدارة المستودعات الذكي</p>
+            <div class="loader-line"></div>
+        </div>
+    </div>
+
+    <div class="app-container">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <div class="logo">
+                <i class="ri-archive-fill logo-icon"></i>
+                <h2>WMS Pro</h2>
+            </div>
+            
+            <nav class="nav-menu">
+                <div class="nav-group">
+                    <h3>الرئيسية</h3>
+                    <button class="nav-item active" onclick="showModule('dashboard')">
+                        <i class="ri-dashboard-3-line icon"></i>
+                        لوحة المؤشرات
+                    </button>
+                </div>
+
+                <div class="nav-group">
+                    <h3>العمليات (Operations)</h3>
+                    <button class="nav-item" onclick="showModule('inbound')">
+                        <i class="ri-arrow-right-down-line icon"></i>
+                        الوارد (Inbound)
+                    </button>
+                    <button class="nav-item" onclick="showModule('outbound')">
+                        <i class="ri-arrow-right-up-line icon"></i>
+                        الصادر (Outbound)
+                    </button>
+                    <button class="nav-item" onclick="showModule('inventory')">
+                        <i class="ri-store-2-line icon"></i>
+                        جرد المخزون
+                    </button>
+                </div>
+
+                <div class="nav-group">
+                    <h3>البيانات الأساسية (Master Data)</h3>
+                    <button class="nav-item" onclick="showModule('products')">
+                        <i class="ri-box-3-line icon"></i>
+                        المنتجات
+                    </button>
+                    <button class="nav-item" onclick="showModule('suppliers')">
+                        <i class="ri-group-line icon"></i>
+                        الموردين والعملاء
+                    </button>
+                </div>
+
+                <div class="nav-group footer">
+                    <div id="connectionStatus" class="status-badge offline">
+                        <i class="ri-wifi-off-line"></i> غير متصل
+                    </div>
+                </div>
+            </nav>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="main-content">
+            <!-- Top Header -->
+            <header class="top-header">
+                <div class="header-start">
+                    <button class="menu-toggle"><i class="ri-menu-line"></i></button>
+                    <h1 id="pageTitle">لوحة المؤشرات</h1>
+                </div>
+                <div class="user-profile">
+                    <button class="icon-btn"><i class="ri-notification-3-line"></i></button>
+                    <div class="user-info">
+                        <span>Admin User</span>
+                        <span class="role">مدير النظام</span>
+                    </div>
+                    <div class="avatar">A</div>
+                </div>
+            </header>
+
+            <!-- Dashboard Module -->
+            <section id="dashboard" class="module active">
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <h3>إجمالي المخزون</h3>
+                        <p class="value" id="dashTotalStock">--</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3>وارد اليوم</h3>
+                        <p class="value" id="dashTodayInbound">--</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3>صادر اليوم</h3>
+                        <p class="value" id="dashTodayOutbound">--</p>
+                    </div>
+                    <div class="stat-card warning">
+                        <h3>تنبيهات المخزون</h3>
+                        <p class="value" id="dashAlerts">--</p>
+                    </div>
+                </div>
+                
+                <div class="process-flow">
+                    <div class="flow-header">
+                        <h3>نظرة عامة على العمليات</h3>
+                        <span class="tag">Live Flow</span>
+                    </div>
+                    <div class="flow-steps">
+                        <div class="step">
+                            <div class="step-icon"><i class="ri-file-list-3-line"></i></div>
+                            <span>استلام طلب</span>
+                        </div>
+                        <div class="line"></div>
+                        <div class="step">
+                            <div class="step-icon"><i class="ri-archive-line"></i></div>
+                            <span>تخزين</span>
+                        </div>
+                        <div class="line"></div>
+                        <div class="step">
+                            <div class="step-icon"><i class="ri-search-eye-line"></i></div>
+                            <span>تجهيز</span>
+                        </div>
+                        <div class="line"></div>
+                        <div class="step">
+                            <div class="step-icon"><i class="ri-truck-line"></i></div>
+                            <span>شحن</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Inbound Module -->
+            <section id="inbound" class="module">
+                <div class="module-header">
+                    <div class="steps-nav">
+                        <button class="step-btn active">استلام (Receive)</button>
+                        <button class="step-btn">فحص جودة (QC)</button>
+                        <button class="step-btn">تخزين (Putaway)</button>
+                    </div>
+                    <button class="btn btn-primary" onclick="openModal('inboundModal')">+ استلام جديد</button>
+                </div>
+                
+                <div class="table-container">
+                    <table id="inboundTable">
+                        <thead>
+                            <tr>
+                                <th>رقم الإذن</th>
+                                <th>المورد</th>
+                                <th>المنتج</th>
+                                <th>الكمية</th>
+                                <th>الحالة</th>
+                                <th>التاريخ</th>
+                            </tr>
+                        </thead>
+                        <tbody id="inboundList">
+                            <!-- Dynamic Content -->
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- Outbound Module -->
+            <section id="outbound" class="module">
+                <div class="module-header">
+                    <div class="steps-nav">
+                        <button class="step-btn active">أوامر البيع</button>
+                        <button class="step-btn">تجميع (Picking)</button>
+                        <button class="step-btn">شحن (Shipping)</button>
+                    </div>
+                    <button class="btn btn-primary" onclick="openModal('outboundModal')">+ أمر صرف</button>
+                </div>
+
+                <div class="table-container">
+                    <table id="outboundTable">
+                        <thead>
+                            <tr>
+                                <th>رقم الأمر</th>
+                                <th>العميل</th>
+                                <th>المواد</th>
+                                <th>الكمية</th>
+                                <th>مرحلة العمل</th>
+                                <th>الإجراءات</th>
+                            </tr>
+                        </thead>
+                        <tbody id="outboundList">
+                            <!-- Dynamic Content -->
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- Products (Master Data) Module -->
+            <section id="products" class="module">
+                <div class="module-header">
+                    <div class="filters-bar">
+                        <input type="text" placeholder="بحث عن صنف..." id="productSearch">
+                        <select>
+                            <option>جميع الفئات</option>
+                        </select>
+                    </div>
+                    <button class="btn btn-primary" onclick="openModal('productModal')">+ تعريف صنف جديد</button>
+                </div>
+
+                <div class="table-container">
+                    <table id="productsTable">
+                        <thead>
+                            <tr>
+                                <th>كود الصنف</th>
+                                <th>اسم المنتج</th>
+                                <th>الفئة</th>
+                                <th>الرصيد الحالي</th>
+                                <th>حد الطلب</th>
+                                <th>السعر</th>
+                            </tr>
+                        </thead>
+                        <tbody id="productsList">
+                            <!-- Dynamic Content -->
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Modals (Example for Product) -->
+    <div id="productModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>تعريف صنف جديد</h2>
+                <span class="close" onclick="closeModal('productModal')">&times;</span>
+            </div>
+            <form id="productForm">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>كود الصنف (SKU)</label>
+                        <input type="text" name="sku" required>
+                    </div>
+                    <div class="form-group">
+                        <label>اسم المنتج</label>
+                        <input type="text" name="name" required>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>الفئة</label>
+                        <select name="category">
+                            <option value="electronics">إلكترونيات</option>
+                            <option value="raw">مواد خام</option>
+                            <option value="tools">أدوات</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>السعر</label>
+                        <input type="number" name="price" required>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('productModal')">إلغاء</button>
+                    <button type="submit" class="btn btn-primary">حفظ</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modals for Inbound/Outbound (Simplified placeholders) -->
+    <div id="inboundModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>استلام مخزني (Inbound)</h2>
+                <span class="close" onclick="closeModal('inboundModal')">&times;</span>
+            </div>
+            <form id="inboundForm">
+                <div class="form-group">
+                    <label>المنتج</label>
+                    <select id="inboundProductSelect" required></select>
+                </div>
+                <div class="form-group">
+                    <label>الكمية المستلمة</label>
+                    <input type="number" id="inboundQty" required>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-primary">تأكيد الاستلام</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Config Modal (To simulate Appwrite Setup) -->
+    <div id="configModal" class="modal active">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>إعدادات Appwrite</h2>
+            </div>
+            <div class="form-group">
+                <p>لتمكين الـ Demo، أدخل معرف المشروع (Project ID) الخاص بـ Appwrite.</p>
+                <label>Project ID</label>
+                <input type="text" id="configProjectId" placeholder="Ex: 65a123bcde...">
+            </div>
+             <div class="form-group">
+                <label>Database ID</label>
+                <input type="text" id="configDbId" placeholder="Ex: wms_db">
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="useDemoMode()">تجربة بدون ربط (localStorage)</button>
+                <button class="btn btn-primary" onclick="saveConfig()">حفظ واتصال</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="appwrite-config.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
