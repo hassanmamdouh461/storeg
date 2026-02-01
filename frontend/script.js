@@ -73,20 +73,34 @@ function useDemoMode() {
     loadProducts();
 }
 
-function initAppwrite() {
-    client = new Client();
-    client
-        .setEndpoint(AppConfig.endpoint)
-        .setProject(AppConfig.projectId);
+async function initAppwrite() {
+    try {
+        client = new Client();
+        client
+            .setEndpoint(AppConfig.endpoint)
+            .setProject(AppConfig.projectId);
 
-    databases = new Databases(client);
+        databases = new Databases(client);
 
-    document.getElementById('connectionStatus').textContent = '✅ متصل بـ Appwrite';
-    document.getElementById('connectionStatus').classList.add('online');
-    document.getElementById('connectionStatus').classList.remove('offline');
+        // Test connection by fetching products
+        await databases.listDocuments(AppConfig.databaseId, 'products');
 
-    loadDashboard();
-    loadProducts();
+        document.getElementById('connectionStatus').innerHTML = '<i class="ri-wifi-line"></i> متصل';
+        document.getElementById('connectionStatus').classList.add('online');
+        document.getElementById('connectionStatus').classList.remove('offline');
+
+        loadDashboard();
+        loadProducts();
+    } catch (error) {
+        console.error('Appwrite Connection Error:', error);
+        document.getElementById('connectionStatus').innerHTML = '<i class="ri-wifi-off-line"></i> فشل الاتصال';
+        document.getElementById('connectionStatus').classList.remove('online');
+        document.getElementById('connectionStatus').classList.add('offline');
+        
+        // Fallback to demo mode
+        alert('فشل الاتصال بـ Appwrite: ' + error.message + '\nسيتم تفعيل وضع التجربة.');
+        useDemoMode();
+    }
 }
 
 // -------------------------------------------------------------
