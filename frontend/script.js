@@ -15,21 +15,28 @@ document.addEventListener('DOMContentLoaded', () => {
         if (splash) splash.classList.add('hidden');
     }, 2500);
 
-    // Check for saved config
-    const savedProjectId = localStorage.getItem(STORAGE_KEYS.PROJECT_ID);
-    const savedDbId = localStorage.getItem(STORAGE_KEYS.DB_ID);
-    const savedMode = localStorage.getItem(STORAGE_KEYS.MODE);
-
-    if (savedMode === 'demo') {
-        useDemoMode();
-    } else if (savedProjectId && savedDbId) {
-        AppConfig.projectId = savedProjectId;
-        AppConfig.databaseId = savedDbId;
+    // Check if AppConfig has values (hardcoded config)
+    if (AppConfig.projectId && AppConfig.databaseId) {
+        // Use hardcoded config - connect directly
         initAppwrite();
         document.getElementById('configModal').classList.remove('active');
     } else {
-        // Show Config Modal
-        document.getElementById('configModal').classList.add('active');
+        // Check localStorage for saved config
+        const savedProjectId = localStorage.getItem(STORAGE_KEYS.PROJECT_ID);
+        const savedDbId = localStorage.getItem(STORAGE_KEYS.DB_ID);
+        const savedMode = localStorage.getItem(STORAGE_KEYS.MODE);
+
+        if (savedMode === 'demo') {
+            useDemoMode();
+        } else if (savedProjectId && savedDbId) {
+            AppConfig.projectId = savedProjectId;
+            AppConfig.databaseId = savedDbId;
+            initAppwrite();
+            document.getElementById('configModal').classList.remove('active');
+        } else {
+            // Show Config Modal
+            document.getElementById('configModal').classList.add('active');
+        }
     }
 });
 
