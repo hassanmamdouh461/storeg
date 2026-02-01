@@ -1,0 +1,14 @@
+{
+  "name": "wms-backend",
+  "version": "1.0.0",
+  "description": "WMS Backend Functions for Appwrite",
+  "main": "src/main.js",
+  "type": "module",
+  "scripts": {
+    "setup-db": "node src/setup-database.js",
+    "test": "node src/main.js"
+  },
+  "dependencies": {
+    "node-appwrite": "^12.0.0"
+  }
+}
