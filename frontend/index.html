@@ -6,8 +6,6 @@
     <title>نظام إدارة المستودعات (WMS)</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="splash.css">
-    <!-- Appwrite SDK -->
-    <script src="https://cdn.jsdelivr.net/npm/appwrite@14.0.0"></script>
     <!-- Fonts & Icons -->
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
@@ -302,8 +300,32 @@
         </div>
     </div>
 
-    <!-- Config Modal (To simulate Appwrite Setup) -->
-    <div id="configModal" class="modal active">
+    <!-- Outbound Modal -->
+    <div id="outboundModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>صرف مخزني (Outbound)</h2>
+                <span class="close" onclick="closeModal('outboundModal')">&times;</span>
+            </div>
+            <form id="outboundForm">
+                <div class="form-group">
+                    <label>المنتج</label>
+                    <select id="outboundProductSelect" required></select>
+                </div>
+                <div class="form-group">
+                    <label>الكمية المطلوبة</label>
+                    <input type="number" id="outboundQty" min="1" required>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('outboundModal')">إلغاء</button>
+                    <button type="submit" class="btn btn-primary">تأكيد الصرف</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Config Modal (Hidden by default now) -->
+    <div id="configModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
                 <h2>إعدادات Appwrite</h2>
