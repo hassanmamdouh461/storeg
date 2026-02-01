@@ -14,6 +14,13 @@ const client = new Client()
 const databases = new Databases(client);
 const DATABASE_ID = process.env.APPWRITE_DATABASE_ID;
 
+// CORS Headers helper
+const corsHeaders = {
+    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+    'Access-Control-Allow-Headers': 'Content-Type, Authorization'
+};
+
 /**
  * Main function handler for Appwrite Functions
  */
@@ -22,12 +29,22 @@ export default async ({ req, res, log, error }) => {
 
     log(`Request: ${method} ${path}`);
 
+    // Handle CORS preflight
+    if (method === 'OPTIONS') {
+        return res.empty(204, corsHeaders);
+    }
+
+    // Helper function to send JSON with CORS
+    const jsonResponse = (data, status = 200) => {
+        return res.json(data, status, corsHeaders);
+    };
+
     try {
         // Route handling
         if (path === '/products' && method === 'GET') {
             // Get all products
             const products = await databases.listDocuments(DATABASE_ID, 'products');
-            return res.json(products);
+            return jsonResponse(products);
         }
 
         if (path === '/products' && method === 'POST') {
@@ -39,13 +56,13 @@ export default async ({ req, res, log, error }) => {
                 ID.unique(),
                 data
             );
-            return res.json(product);
+            return jsonResponse(product);
         }
 
         if (path === '/movements' && method === 'GET') {
             // Get all movements
             const movements = await databases.listDocuments(DATABASE_ID, 'movements');
-            return res.json(movements);
+            return jsonResponse(movements);
         }
 
         if (path === '/movements/inbound' && method === 'POST') {
@@ -70,7 +87,7 @@ export default async ({ req, res, log, error }) => {
                 quantity: (product.quantity || 0) + data.quantity
             });
 
-            return res.json({ success: true, movement });
+            return jsonResponse({ success: true, movement });
         }
 
         if (path === '/movements/outbound' && method === 'POST') {
@@ -80,7 +97,7 @@ export default async ({ req, res, log, error }) => {
             // Check stock availability
             const product = await databases.getDocument(DATABASE_ID, 'products', data.productId);
             if (product.quantity < data.quantity) {
-                return res.json({ success: false, error: 'الكمية غير متوفرة' }, 400);
+                return jsonResponse({ success: false, error: 'الكمية غير متوفرة' }, 400);
             }
 
             // Create movement record
@@ -100,7 +117,7 @@ export default async ({ req, res, log, error }) => {
                 quantity: product.quantity - data.quantity
             });
 
-            return res.json({ success: true, movement });
+            return jsonResponse({ success: true, movement });
         }
 
         if (path === '/stats' && method === 'GET') {
@@ -122,14 +139,14 @@ export default async ({ req, res, log, error }) => {
                 ).length
             };
 
-            return res.json(stats);
+            return jsonResponse(stats);
         }
 
         // Default response
-        return res.json({ message: 'WMS API v1.0', endpoints: ['/products', '/movements', '/stats'] });
+        return jsonResponse({ message: 'WMS API v1.0', endpoints: ['/products', '/movements', '/stats'] });
 
     } catch (err) {
         error(err.message);
-        return res.json({ error: err.message }, 500);
+        return jsonResponse({ error: err.message }, 500);
     }
 };
